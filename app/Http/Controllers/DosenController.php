@@ -12,7 +12,8 @@ class DosenController extends Controller
      */
     public function index()
     {
-        //
+        $dosens = Dosen::orderBy('nama')->paginate(10);
+        return view('dosen.index', compact('dosens'));
     }
 
     /**
@@ -20,7 +21,7 @@ class DosenController extends Controller
      */
     public function create()
     {
-        //
+        return view('dosen.create');
     }
 
     /**
@@ -28,7 +29,13 @@ class DosenController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nama' => ['required', 'string', 'max:100'],
+            'nidn' => ['required', 'string', 'max:20', 'unique:dosens,nidn'],
+            'email' => ['required', 'email', 'max:100', 'unique:dosens,email'],
+        ]);
+        Dosen::create($validated);
+        return redirect()->route('dosen.index')->with('success', 'Data dosen berhasil ditambahkan.');
     }
 
     /**
@@ -36,7 +43,7 @@ class DosenController extends Controller
      */
     public function show(Dosen $dosen)
     {
-        //
+        return view('dosen.show', compact('dosen'));
     }
 
     /**
@@ -44,7 +51,7 @@ class DosenController extends Controller
      */
     public function edit(Dosen $dosen)
     {
-        //
+        return view('dosen.edit', compact('dosen'));
     }
 
     /**
@@ -52,7 +59,13 @@ class DosenController extends Controller
      */
     public function update(Request $request, Dosen $dosen)
     {
-        //
+        $validated = $request->validate([
+            'nama' => ['required', 'string', 'max:100'],
+            'nidn' => ['required', 'string', 'max:20', 'unique:dosens,nidn,' . $dosen->id],
+            'email' => ['required', 'email', 'max:100', 'unique:dosens,email,' . $dosen->id],
+        ]);
+        $dosen->update($validated);
+        return redirect()->route('dosen.index')->with('success', 'Data dosen berhasil diperbarui.');
     }
 
     /**
@@ -60,6 +73,7 @@ class DosenController extends Controller
      */
     public function destroy(Dosen $dosen)
     {
-        //
+        $dosen->delete();
+        return redirect()->route('dosen.index')->with('success', 'Data dosen berhasil dihapus.');
     }
 }
