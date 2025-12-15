@@ -13,7 +13,15 @@ class MahasiswaController extends Controller
     public function index()
     {
         $prodi= "TI";
-        $mahasiswas = Mahasiswa::orderBy('nama')->paginate(10);
+        $mahasiswas = Mahasiswa::select('id','nama', 'nim', 'email')
+                                // ->where(['nim' => '2303000066', 'id' => 4])
+                                ->orderBy('nama')
+                                ->paginate(10);
+
+
+        // "Select nama, id from mahasiswas where prodi = 'TI' order by nama asc";
+        // return response()->json($mahasiswas);
+
         return view('mahasiswa.index', compact('mahasiswas', 'prodi'));
     }
 
@@ -56,7 +64,7 @@ class MahasiswaController extends Controller
      */
     public function edit(Mahasiswa $mahasiswa)
     {
-        //
+        return view('mahasiswa.edit', compact('mahasiswa'));
     }
 
     /**
@@ -64,7 +72,17 @@ class MahasiswaController extends Controller
      */
     public function update(Request $request, Mahasiswa $mahasiswa)
     {
-        //
+        // return response()->json($request);
+
+        $validated = $request->validate([
+            'nama' => ['required', 'string', 'max:100'],
+            'nim'  => ['required', 'string', 'max:20', 'unique:mahasiswas,nim,' . $mahasiswa->id],
+            'email' => ['required', 'email', 'max:100', 'unique:mahasiswas,email,' . $mahasiswa->id],
+        ]);
+
+        $mahasiswa->update($validated);
+
+        return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil diperbarui.');
     }
 
     /**
